@@ -35,8 +35,12 @@ PING_RE = (
     r'time (?P<time_ms>\d+)ms$'
 )
 
+PROCESS_RE = (
+    r'\[\w*\] (?P<process>\d+)'
+)
 
-def ping(enode, count, destination, interval=None, shell=None):
+
+def ping(enode, count, destination, save_file=False, background=False, interval=None, shell=None):
     """
     Perform a ping and parse the result.
 
@@ -44,6 +48,8 @@ def ping(enode, count, destination, interval=None, shell=None):
     :type enode: topology.platforms.base.BaseNode
     :param int count: Number of packets to send.
     :param str destination: The destination host.
+    :param bool background: Use & to send background
+    :param bool save_file: Save file into tmp
     :param float interval: The wait interval in seconds between each packet.
     :param str shell: Shell name to execute commands. If ``None``, use the
      Engine Node default shell.
@@ -74,11 +80,20 @@ def ping(enode, count, destination, interval=None, shell=None):
         cmd.append('-i')
         cmd.append(str(interval))
 
+    if save_file is True:
+        cmd.append('>> /tmp/ping.txt')
+
+    if background is True:
+        cmd.append('&')
+
     ping_raw = enode(' '.join(cmd), shell=shell)
     assert ping_raw
 
     for line in ping_raw.splitlines():
-        m = match(PING_RE, line)
+        if save_file is True and background is True:
+            m = match(PROCESS_RE, line)
+        else:
+            m = match(PING_RE, line)
         if m:
             return {
                 k: (int(v) if v is not None else 0)
