@@ -30,6 +30,7 @@ from ipaddress import ip_address
 PING_RE = (
     r'^(?P<transmitted>\d+) packets transmitted, '
     r'(?P<received>\d+) received,'
+    r'( \+(?P<duplicates>\d+) duplicates,)?'
     r'( \+(?P<errors>\d+) errors,)? '
     r'(?P<loss_pc>\d+)% packet loss, '
     r'time (?P<time_ms>\d+)ms$'
